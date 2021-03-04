@@ -6,6 +6,8 @@ import openfl.text.TextFormat;
 import openfl.events.Event;
 import openfl.events.MouseEvent;
 
+typedef Square = {letter:Int,number:Int,code:String, color:String};
+
 class Main extends Sprite
 {
   final letters = ['a','b','c','d','e','f','g','h'];
@@ -15,6 +17,7 @@ class Main extends Sprite
   var button:TextField;
   var squareField:TextField;
   var answerField:TextField;
+  var board: Sprite;
 
   var revealMode = {};
   var generateMode = {};
@@ -25,8 +28,28 @@ class Main extends Sprite
     var letter = Math.floor(Math.random() * 8);
     var number = Math.floor(Math.random() * 8);
     var color = if ((letter + number) % 2 == 0) "Black" else "White";
-    var val =  {code: letters[letter] + numbers[number], color: color};
+    var val =  {letter: letter, number: number, code: letters[letter] + numbers[number], color: color};
     return val;
+  }
+
+  function drawBoard (?square:Square) {
+    board.graphics.clear();
+    var boardSide = Math.min(stage.stageWidth * 0.8, 300.0);
+    var squareSide = boardSide / 8.0;
+    for (cx in 0 ... 8)
+      for (cy in 0...8 ) {
+        var color:Int = if ((cx + cy) % 2 == 0) 0xFFFFFF else 0x000000;
+        board.graphics.beginFill( color );
+        board.graphics.drawRect(cx * squareSide, cy * squareSide, squareSide, squareSide);
+        board.graphics.endFill();
+      }
+    if (square != null)
+      {
+        board.graphics.lineStyle(5.0, 0xFF0000, 0.9);
+        board.graphics.drawRect(squareSide * square.letter,
+                                squareSide * (7 - square.number),
+                                squareSide, squareSide);
+      }
   }
 
   public function new()
@@ -69,6 +92,7 @@ class Main extends Sprite
   function revealAnswer () {
     answerField.visible = true;
     button.text = buttonText;
+    board.visible = true;
     mode = generateMode;
   }
   
@@ -90,10 +114,19 @@ class Main extends Sprite
       answerField.setTextFormat( format );
       answerField.x = (stage.stageWidth - answerField.width) / 2;
       answerField.y = squareField.y + squareField.height + 40;
+
+      board = new Sprite();
+      addChild(board);
+      board.visible = false;
+      drawBoard();
+      board.x = (stage.stageWidth - board.width) / 2;
+      board.y = answerField.y + 50;
     }
     squareField.text = square.code;
     answerField.text = square.color;
     answerField.visible = false;
+    board.visible = false;
+    drawBoard( square );
 
     button.text = "reveal";
     mode = revealMode;

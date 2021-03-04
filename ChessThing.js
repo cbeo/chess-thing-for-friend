@@ -868,14 +868,14 @@ ApplicationMain.main = function() {
 ApplicationMain.create = function(config) {
 	var app = new openfl_display_Application();
 	ManifestResources.init(config);
-	app.meta.h["build"] = "32";
+	app.meta.h["build"] = "2";
 	app.meta.h["company"] = "Company Name";
 	app.meta.h["file"] = "ChessThing";
 	app.meta.h["name"] = "ChessThing";
 	app.meta.h["packageName"] = "com.sample.chessthing";
 	app.meta.h["version"] = "1.0.0";
 	var attributes = { allowHighDPI : false, alwaysOnTop : false, borderless : false, element : null, frameRate : 60, height : 0, hidden : false, maximized : false, minimized : false, parameters : { }, resizable : true, title : "ChessThing", width : 0, x : null, y : null};
-	attributes.context = { antialiasing : 0, background : 16777215, colorDepth : 32, depth : true, hardware : true, stencil : true, type : null, vsync : false};
+	attributes.context = { antialiasing : 0, background : 11184810, colorDepth : 32, depth : true, hardware : true, stencil : true, type : null, vsync : false};
 	if(app.__window == null) {
 		if(config != null) {
 			var _g = 0;
@@ -4043,8 +4043,29 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 		var letter = Math.floor(Math.random() * 8);
 		var number = Math.floor(Math.random() * 8);
 		var color = (letter + number) % 2 == 0 ? "Black" : "White";
-		var val = { code : this.letters[letter] + this.numbers[number], color : color};
+		var val = { letter : letter, number : number, code : this.letters[letter] + this.numbers[number], color : color};
 		return val;
+	}
+	,drawBoard: function(square) {
+		this.board.get_graphics().clear();
+		var boardSide = Math.min(this.stage.stageWidth * 0.8,300.0);
+		var squareSide = boardSide / 8.0;
+		var _g = 0;
+		while(_g < 8) {
+			var cx = _g++;
+			var _g1 = 0;
+			while(_g1 < 8) {
+				var cy = _g1++;
+				var color = (cx + cy) % 2 == 0 ? 16777215 : 0;
+				this.board.get_graphics().beginFill(color);
+				this.board.get_graphics().drawRect(cx * squareSide,cy * squareSide,squareSide,squareSide);
+				this.board.get_graphics().endFill();
+			}
+		}
+		if(square != null) {
+			this.board.get_graphics().lineStyle(5.0,16711680,0.9);
+			this.board.get_graphics().drawRect(squareSide * square.letter,squareSide * (7 - square.number),squareSide,squareSide);
+		}
 	}
 	,init: function(e) {
 		this.removeEventListener("addedToStage",$bind(this,this.init));
@@ -4070,6 +4091,7 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 	,revealAnswer: function() {
 		this.answerField.set_visible(true);
 		this.button.set_text(this.buttonText);
+		this.board.set_visible(true);
 		this.mode = this.generateMode;
 	}
 	,generatePuzzle: function() {
@@ -4087,10 +4109,18 @@ Main.prototype = $extend(openfl_display_Sprite.prototype,{
 			this.answerField.setTextFormat(this.format);
 			this.answerField.set_x((this.stage.stageWidth - this.answerField.get_width()) / 2);
 			this.answerField.set_y(this.squareField.get_y() + this.squareField.get_height() + 40);
+			this.board = new openfl_display_Sprite();
+			this.addChild(this.board);
+			this.board.set_visible(false);
+			this.drawBoard();
+			this.board.set_x((this.stage.stageWidth - this.board.get_width()) / 2);
+			this.board.set_y(this.answerField.get_y() + 50);
 		}
 		this.squareField.set_text(square.code);
 		this.answerField.set_text(square.color);
 		this.answerField.set_visible(false);
+		this.board.set_visible(false);
+		this.drawBoard(square);
 		this.button.set_text("reveal");
 		this.mode = this.revealMode;
 	}
@@ -22991,7 +23021,7 @@ var lime_utils_AssetCache = function() {
 	this.audio = new haxe_ds_StringMap();
 	this.font = new haxe_ds_StringMap();
 	this.image = new haxe_ds_StringMap();
-	this.version = 955752;
+	this.version = 488711;
 };
 $hxClasses["lime.utils.AssetCache"] = lime_utils_AssetCache;
 lime_utils_AssetCache.__name__ = "lime.utils.AssetCache";
